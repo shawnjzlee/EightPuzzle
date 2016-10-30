@@ -2,10 +2,11 @@
 #include <string>
 #include <sstream>
 #include <algorithm>
-#include <string>
 #include <cmath>
+#include <queue>
 
 #include "eight_puzzle.h"
+#include "search_tree_node.h"
 
 EightPuzzle::EightPuzzle() { }
 
@@ -16,8 +17,33 @@ void EightPuzzle::default_puzzle_init(std::vector<int> _puzzle_grid) {
     create_puzzle_grid_solution();
 }
 
+// function expand(node, problem) returns a set of nodes
+// successors <- the empty set
+// for each action, result in successor-fn[problem](state[node]) do
+//      s <- a new node
+//      parent_node[s] <- node; action[s] <- action; state[s] <- result
+//      path_cost[s] <- path_cost[node] + step_cost(node, action, s)
+//      depth[s] <- depth[node] + 1
+//      add s to successor
+// return successor
+
 void EightPuzzle::uniform_cost() {
+    std::queue<SearchTreeNode> fringe;
+    std::queue<SearchTreeNode> expanded;
     
+    // fringe <- insert(make-node(initial-state[problem]), fringe)
+    SearchTreeNode node(0, 0, 0, puzzle_grid);
+    fringe.push(node);
+    
+    // loop do, return if fringe is empty
+    while(!fringe.empty()) {
+        // node <- remove-front(fringe)
+        node = fringe.front();
+        fringe.pop();
+        
+        //if goal-test[problem] applied to state(node) succeeds return node
+        //fringe <- insert_all(expand(node, problem), fringe)
+    }
     return;
 }
 
