@@ -1,7 +1,7 @@
 CC=g++-5
 CFLAGS=-c -std=c++11
 LDFLAGS=
-SOURCES=main.cpp eight_puzzle.cpp
+SOURCES=main.cpp eight_puzzle.cpp search_tree_node.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=eightpuzzle
 BUILD_DIR=./bin

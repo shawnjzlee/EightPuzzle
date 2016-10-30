@@ -11,15 +11,21 @@ EightPuzzle::EightPuzzle() { }
 
 EightPuzzle::~EightPuzzle() { }
 
-void EightPuzzle::uniform_cost(int puzzle_option) {
+void EightPuzzle::default_puzzle_init(std::vector<int> _puzzle_grid) {
+    puzzle_grid = _puzzle_grid;
+    create_puzzle_grid_solution();
+}
+
+void EightPuzzle::uniform_cost() {
+    
     return;
 }
 
-void EightPuzzle::misplaced_tile_astar(int puzzle_option) {
+void EightPuzzle::misplaced_tile_astar() {
     return;
 }
 
-void EightPuzzle::manhattan_dist_astar(int puzzle_option) {
+void EightPuzzle::manhattan_dist_astar() {
     return;
 }
 
@@ -44,7 +50,7 @@ void EightPuzzle::setup_puzzle_grid() {
 
     int num_zeros = 0;
     for_each(puzzle_grid.begin(), puzzle_grid.end(), 
-            [&num_zeros, this](int &i) {
+            [&, this](int &i) {
                 if(i == 0) num_zeros++;
                 if(num_zeros > 1) {
                     std::cout << "Please enter only one zero\n";
@@ -61,16 +67,26 @@ void EightPuzzle::setup_puzzle_grid() {
         setup_puzzle_grid();
     }
     
-    std::cout << puzzle_grid.size() << std::endl;
     double d_sqrt = std::sqrt(puzzle_grid.size());
     int i_sqrt = d_sqrt;
     if (d_sqrt != i_sqrt) {
         std::cout << "Not a NxN grid, please enter a perfect square set of numbers\n";
         setup_puzzle_grid();
     }
+    
+    create_puzzle_grid_solution();
 }
 
 void EightPuzzle::print_puzzle_grid() {
     for(const auto &i : puzzle_grid) std::cout << i << " ";
     std::cout << std::endl;
+}
+
+void EightPuzzle::create_puzzle_grid_solution() {
+    int j = 0;
+    for_each(puzzle_grid.begin(), puzzle_grid.end() - 1, 
+            [&, this](int &i) {
+                puzzle_grid_solution.push_back(++j);
+            });
+    puzzle_grid_solution.push_back(0);
 }
