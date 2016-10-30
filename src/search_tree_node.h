@@ -9,6 +9,17 @@ class SearchTreeNode {
         SearchTreeNode(int, int, int, std::vector<int>);
         ~SearchTreeNode();
     
+        void print_node_state();
+        
+        int get_depth() const;
+        void set_depth(int);
+        
+        int get_path_cost() const;
+        void set_path_cost(int);
+        
+        int get_heuristic_value() const;
+        void set_heuristic_value(int);
+    
     private:
         std::vector<int> state; // grid values of this node
         
