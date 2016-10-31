@@ -5,8 +5,7 @@
 
 class SearchTreeNode {
     public:
-        virtual std::vector<int> get_node_state() = 0;
-        
+        virtual std::vector<int> get_node_state() const = 0;
         virtual void node_expansion() = 0;
         
         struct node_status {
