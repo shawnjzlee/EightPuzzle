@@ -3,26 +3,33 @@
 
 #include <vector>
 
-class EightPuzzle {
+#include "search_tree_node.h"
+
+class EightPuzzle : public SearchTreeNode {
     public:
         EightPuzzle();
+        EightPuzzle(int, int, int, std::vector<int>);
         ~EightPuzzle();
         
-        void default_puzzle_init(std::vector<int>);
+        std::vector<int> get_node_state();
+        
+        void node_expansion();
+        
+        void default_grid_init(std::vector<int>);
         
         void uniform_cost();
         void misplaced_tile_astar();
         void manhattan_dist_astar();
         
-        void setup_puzzle_grid();
-        void print_puzzle_grid();
-        void setup_puzzle_grid_solution();
-        void print_puzzle_grid_solution();
-        bool check_puzzle_grid_solution(std::vector<int>);
+        void setup_grid();
+        void print_grid();
+        void setup_grid_solution();
+        void print_grid_solution();
+        bool check_grid_solution(std::vector<int>);
         
     private:
-        std::vector<int> puzzle_grid;
-        std::vector<int> puzzle_grid_solution;
+        std::vector<int> grid;
+        std::vector<int> grid_solution;
         
         int grid_width;
 };

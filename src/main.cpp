@@ -27,12 +27,12 @@ void menu(void) {
     
     if(option == 1) {
         std::vector<int> default_puzzle_grid = {1, 2, 3, 4, 0, 6, 7, 5, 8};
-        puzzle.default_puzzle_init(default_puzzle_grid);
+        puzzle.default_grid_init(default_puzzle_grid);
     }
     
     switch(option) {
         case 1: algorithm_choice(puzzle); break;
-        case 2: puzzle.setup_puzzle_grid(); algorithm_choice(puzzle); break;
+        case 2: puzzle.setup_grid(); algorithm_choice(puzzle); break;
         default: std::cout << "Please re-enter an option\n"; menu();
     }
 }

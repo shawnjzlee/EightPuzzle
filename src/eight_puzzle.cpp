@@ -10,12 +10,33 @@
 
 EightPuzzle::EightPuzzle() { }
 
+EightPuzzle::EightPuzzle(int _depth, int _path_cost, int _heuristic_value,
+                               std::vector<int> _grid) {
+    node_status.depth = _depth;
+    node_status.path_cost = _path_cost;
+    node_status.heuristic_value = _heuristic_value;
+    grid = _grid;
+    grid_width = std::sqrt(grid.size());
+}
+
 EightPuzzle::~EightPuzzle() { }
 
-void EightPuzzle::default_puzzle_init(std::vector<int> _puzzle_grid) {
-    puzzle_grid = _puzzle_grid;
-    setup_puzzle_grid_solution();
+void EightPuzzle::default_grid_init(std::vector<int> _grid) {
+    grid = _grid;
+    setup_grid_solution();
 }
+
+std::vector<int> EightPuzzle::get_node_state() {
+    return grid;
+}
+
+void EightPuzzle::node_expansion() {
+    std::cout << "The best state to expand with a g(n) = "
+              << node_status.path_cost << " is...\n";
+    print_grid();
+    std::cout << "Expanding this node...\n";
+}
+
 
 // function expand(node, problem) returns a set of nodes
 // successors <- the empty set
@@ -28,11 +49,11 @@ void EightPuzzle::default_puzzle_init(std::vector<int> _puzzle_grid) {
 // return successor
 
 void EightPuzzle::uniform_cost() {
-    std::queue<SearchTreeNode> fringe;
-    std::queue<SearchTreeNode> expanded;
+    std::queue<EightPuzzle> fringe;
+    std::queue<EightPuzzle> expanded;
     
     // fringe <- insert(make-node(initial-state[problem]), fringe)
-    SearchTreeNode node(0, 0, 0, puzzle_grid);
+    EightPuzzle node(0, 0, 0, grid);
     fringe.push(node);
 
     int expanded_nodes = 0;
@@ -45,9 +66,9 @@ void EightPuzzle::uniform_cost() {
         fringe.pop();
         
         //if goal-test[problem] applied to state(node) succeeds return node
-        if(check_puzzle_grid_solution(node.get_node_state())) {
+        if(check_grid_solution(grid)) {
             std::cout << "Solution found.\n";
-            node.print_node_state();
+            node.print_grid();
             std::cout << "To solve this problem, the uniform cost algorithm expanded a total of "
                       << expanded_nodes << " nodes.\n";
             std::cout << "The maximum number of nodes in the queue at any one time was "
@@ -74,11 +95,11 @@ void EightPuzzle::manhattan_dist_astar() {
     return;
 }
 
-void EightPuzzle::setup_puzzle_grid() {
+void EightPuzzle::setup_grid() {
     std::cout << "Enter your puzzle, use a zero to represent the blank."
               << " Separate values with a space. Press 'Enter' when complete\n";
     std::string s, value;
-    puzzle_grid.clear();
+    grid.clear();
     
     if(std::cin.peek() == '\n')
         std::cin.ignore();
@@ -86,74 +107,74 @@ void EightPuzzle::setup_puzzle_grid() {
     std::stringstream ss(s);
     while(getline(ss, value, ' ')) {
         try {
-            puzzle_grid.push_back(stoi(value));
+            grid.push_back(stoi(value));
         }
         catch (const std::exception &e) {
             std::cout << "Too many spaces, please re-enter the values\n";
-            setup_puzzle_grid();
+            setup_grid();
         } 
     }
     
-    double d_sqrt = std::sqrt(puzzle_grid.size());
+    double d_sqrt = std::sqrt(grid.size());
     grid_width = d_sqrt;
     if (d_sqrt != grid_width) {
         std::cout << "Not a NxN grid, please enter a perfect square set of numbers\n";
-        setup_puzzle_grid();
+        setup_grid();
     }
 
     int num_zeros = 0;
-    for_each(puzzle_grid.begin(), puzzle_grid.end(), 
+    for_each(grid.begin(), grid.end(), 
             [&, this](int &i) {
                 if(i == 0) num_zeros++;
                 if(num_zeros > 1) {
                     std::cout << "Please enter only one zero\n";
-                    setup_puzzle_grid();
+                    setup_grid();
                     return;
                 }
                 if(i > 9 && grid_width < 4) {
                     std::cout << "Please enter single digit values\n";
-                    setup_puzzle_grid();
+                    setup_grid();
                     return;
                 }
             });
             
     if(num_zeros == 0) {
         std::cout << "Please enter one zero\n";
-        setup_puzzle_grid();
+        setup_grid();
     }
     
-    setup_puzzle_grid_solution();
+    setup_grid_solution();
 }
 
-void EightPuzzle::print_puzzle_grid() {
-    for(int i = 0; i < puzzle_grid.size(); i++) {
-        std::cout << puzzle_grid.at(i) << " ";
+void EightPuzzle::print_grid() {
+    for(int i = 0; i < grid.size(); i++) {
+        std::cout << grid.at(i) << " ";
         if(!((i+1) % grid_width || i == 0)) std::cout << std::endl;
     }
     std::cout << std::endl;
 }
 
-void EightPuzzle::setup_puzzle_grid_solution() {
+void EightPuzzle::setup_grid_solution() {
     int j = 0;
-    puzzle_grid_solution.clear();
+    grid_solution.clear();
     
-    for_each(puzzle_grid.begin(), puzzle_grid.end() - 1, 
+    for_each(grid.begin(), grid.end() - 1, 
             [&, this](int &i) {
-                puzzle_grid_solution.push_back(++j);
+                grid_solution.push_back(++j);
             });
-    puzzle_grid_solution.push_back(0);
+    grid_solution.push_back(0);
     
-    print_puzzle_grid_solution();
+    print_grid_solution();
 }
 
-void EightPuzzle::print_puzzle_grid_solution() {
-    for(int i = 0; i < puzzle_grid_solution.size(); i++) {
-        std::cout << puzzle_grid_solution.at(i) << " ";
+void EightPuzzle::print_grid_solution() {
+    for(int i = 0; i < grid_solution.size(); i++) {
+        std::cout << grid_solution.at(i) << " ";
         if(!((i+1) % grid_width || i == 0)) std::cout << std::endl;
     }
     std::cout << std::endl;
 }
 
-bool EightPuzzle::check_puzzle_grid_solution(std::vector<int> state) {
-    return state == puzzle_grid_solution;
+bool EightPuzzle::check_grid_solution(std::vector<int> state) {
+    return state == grid_solution;
 }
