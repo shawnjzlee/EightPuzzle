@@ -34,12 +34,7 @@ void EightPuzzle::uniform_cost() {
     // fringe <- insert(make-node(initial-state[problem]), fringe)
     SearchTreeNode node(0, 0, 0, puzzle_grid);
     fringe.push(node);
-    
-    std::cout << "In uniform cost: " << std::endl;
-    print_puzzle_grid();
-    node.print_node_state();
-    print_puzzle_grid_solution();
-    
+
     int expanded_nodes = 0;
     int maximum_queued_nodes = 0;
     int currently_queued_nodes = 1;
@@ -60,6 +55,7 @@ void EightPuzzle::uniform_cost() {
             std::cout << "The depth of the goal node was " << node.node_status.depth << ".\n";
             return;
         }
+        
         
         
         
@@ -97,6 +93,13 @@ void EightPuzzle::setup_puzzle_grid() {
             setup_puzzle_grid();
         } 
     }
+    
+    double d_sqrt = std::sqrt(puzzle_grid.size());
+    grid_width = d_sqrt;
+    if (d_sqrt != grid_width) {
+        std::cout << "Not a NxN grid, please enter a perfect square set of numbers\n";
+        setup_puzzle_grid();
+    }
 
     int num_zeros = 0;
     for_each(puzzle_grid.begin(), puzzle_grid.end(), 
@@ -107,7 +110,7 @@ void EightPuzzle::setup_puzzle_grid() {
                     setup_puzzle_grid();
                     return;
                 }
-                if(i > 9) {
+                if(i > 9 && grid_width < 4) {
                     std::cout << "Please enter single digit values\n";
                     setup_puzzle_grid();
                     return;
@@ -116,13 +119,6 @@ void EightPuzzle::setup_puzzle_grid() {
             
     if(num_zeros == 0) {
         std::cout << "Please enter one zero\n";
-        setup_puzzle_grid();
-    }
-    
-    double d_sqrt = std::sqrt(puzzle_grid.size());
-    grid_width = d_sqrt;
-    if (d_sqrt != grid_width) {
-        std::cout << "Not a NxN grid, please enter a perfect square set of numbers\n";
         setup_puzzle_grid();
     }
     
