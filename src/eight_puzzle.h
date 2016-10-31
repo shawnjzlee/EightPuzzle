@@ -16,10 +16,14 @@ class EightPuzzle {
         
         void setup_puzzle_grid();
         void print_puzzle_grid();
-        void create_puzzle_grid_solution();
+        void setup_puzzle_grid_solution();
+        void print_puzzle_grid_solution();
+        bool check_puzzle_grid_solution(std::vector<int>);
         
     private:
         std::vector<int> puzzle_grid;
         std::vector<int> puzzle_grid_solution;
+        
+        int grid_width;
 };
 #endif /* eight_puzzle.h */
