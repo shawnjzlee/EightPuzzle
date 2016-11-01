@@ -6,6 +6,7 @@
 
 #include "search_tree_node.h"
 
+
 class EightPuzzle : public SearchTreeNode {
     public:
         EightPuzzle();
