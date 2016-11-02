@@ -94,10 +94,11 @@ bool EightPuzzle::move_right() {
     }
 }
 
-bool EightPuzzle::is_not_repeated_grid(EightPuzzle child, std::queue<EightPuzzle> expanded) {
+template <typename PriorityQueue>
+bool EightPuzzle::is_not_repeated_grid(EightPuzzle child, PriorityQueue expanded) {
     EightPuzzle temp(child.m_grid);
     while(!expanded.empty()) {
-        temp = expanded.front();
+        temp = expanded.top();
         expanded.pop();
         if(temp.m_grid == child.m_grid)
             return false;
@@ -116,6 +117,18 @@ bool EightPuzzle::is_not_repeated_grid(EightPuzzle child, std::queue<EightPuzzle
 // return successor
 
 void EightPuzzle::uniform_cost() {
+    
+    auto check = [](EightPuzzle child, std::queue<EightPuzzle> expanded) {
+        EightPuzzle temp(child.m_grid);
+        while(!expanded.empty()) {
+            temp = expanded.front();
+            expanded.pop();
+            if(temp.m_grid == child.m_grid)
+                return false;
+        }
+        return true;
+    };
+    
     std::queue<EightPuzzle> fringe;
     std::queue<EightPuzzle> expanded;
     
@@ -153,22 +166,22 @@ void EightPuzzle::uniform_cost() {
                                parent_node.node_status.heuristic_value,
                                parent_node.m_grid);
                                
-        if(child_node.move_up() && is_not_repeated_grid(child_node, expanded)) {
+        if(child_node.move_up() && check(child_node, expanded)) {
             fringe.push(child_node);
             expanded.push(child_node);
         }
         child_node.m_grid = parent_node.m_grid;
-        if(child_node.move_down() && is_not_repeated_grid(child_node, expanded)) {
+        if(child_node.move_down() && check(child_node, expanded)) {
             fringe.push(child_node);
             expanded.push(child_node);
         }
         child_node.m_grid = parent_node.m_grid;
-        if(child_node.move_left() && is_not_repeated_grid(child_node, expanded)) {
+        if(child_node.move_left() && check(child_node, expanded)) {
             fringe.push(child_node);
             expanded.push(child_node);
         }
         child_node.m_grid = parent_node.m_grid;
-        if(child_node.move_right() && is_not_repeated_grid(child_node, expanded)) {
+        if(child_node.move_right() && check(child_node, expanded)) {
             fringe.push(child_node);
             expanded.push(child_node);
         }
@@ -179,6 +192,79 @@ void EightPuzzle::uniform_cost() {
 }
 
 void EightPuzzle::misplaced_tile_astar() {
+    auto cmp = [](EightPuzzle lhs, EightPuzzle rhs) {
+        return (lhs.node_status.path_cost + lhs.node_status.heuristic_value) >
+               (rhs.node_status.path_cost + rhs.node_status.heuristic_value);
+    };
+    
+    auto num_misplaced = [this](std::vector<int> grid) { 
+        int count = 0;
+        for(int i = 0; i < m_grid.size(); i++)
+            if(grid.at(i) != m_grid_solution.at(i)) count++;
+        return count;
+    };
+    
+    std::priority_queue<EightPuzzle, std::vector<EightPuzzle>, decltype(cmp)> fringe(cmp);
+    std::priority_queue<EightPuzzle, std::vector<EightPuzzle>, decltype(cmp)> expanded(cmp);
+    
+    EightPuzzle parent_node(0, 0, num_misplaced(m_grid), m_grid);
+    fringe.push(parent_node);
+    expanded.push(parent_node);
+    
+    int maximum_queued_nodes = 0;
+    while(!fringe.empty()) {
+        parent_node = fringe.top();
+        fringe.pop();
+        
+        if(check_grid_solution(parent_node.m_grid)) {
+            std::cout << "Solution found.\n";
+            parent_node.print_grid();
+            std::cout << "To solve this problem, the uniform cost algorithm expanded a total of "
+                      << expanded.size() << " nodes.\n";
+            std::cout << "The maximum number of nodes in the queue at any one time was "
+                      << maximum_queued_nodes << ".\n";
+            std::cout << "The depth of the goal node was " << parent_node.node_status.depth << ".\n";
+            return;
+        }
+        
+        std::cout << "The best state to expand with a g(n) = "
+                  << parent_node.node_status.path_cost << " and h(n) = " 
+                  << parent_node.node_status.heuristic_value << " is...\n";
+        parent_node.print_grid();
+        std::cout << "Expanding this node...\n";
+        
+        EightPuzzle child_node(parent_node.node_status.depth + 1,
+                               parent_node.node_status.path_cost + 1,
+                               parent_node.node_status.heuristic_value,
+                               parent_node.m_grid);
+                               
+        if(child_node.move_up() && is_not_repeated_grid(child_node, expanded)) {
+            child_node.node_status.heuristic_value = num_misplaced(child_node.m_grid);
+            fringe.push(child_node);
+            expanded.push(child_node);
+        }
+        child_node.m_grid = parent_node.m_grid;
+        if(child_node.move_down() && is_not_repeated_grid(child_node, expanded)) {
+            child_node.node_status.heuristic_value = num_misplaced(child_node.m_grid);
+            fringe.push(child_node);
+            expanded.push(child_node);
+        }
+        child_node.m_grid = parent_node.m_grid;
+        if(child_node.move_left() && is_not_repeated_grid(child_node, expanded)) {
+            child_node.node_status.heuristic_value = num_misplaced(child_node.m_grid);
+            fringe.push(child_node);
+            expanded.push(child_node);
+        }
+        child_node.m_grid = parent_node.m_grid;
+        if(child_node.move_right() && is_not_repeated_grid(child_node, expanded)) {
+            child_node.node_status.heuristic_value = num_misplaced(child_node.m_grid);
+            fringe.push(child_node);
+            expanded.push(child_node);
+        }
+        child_node.m_grid = parent_node.m_grid;
+        if(fringe.size() > maximum_queued_nodes) 
+            maximum_queued_nodes = fringe.size();
+    }
 }
 
 void EightPuzzle::manhattan_dist_astar() {

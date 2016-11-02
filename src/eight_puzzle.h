@@ -28,7 +28,8 @@ class EightPuzzle : public SearchTreeNode {
         bool move_left();
         bool move_right();
         
-        bool is_not_repeated_grid(EightPuzzle, std::queue<EightPuzzle>);
+        template <typename PriorityQueue>
+        bool is_not_repeated_grid(EightPuzzle, PriorityQueue);
         
         void setup_grid();
         void print_grid() const;
