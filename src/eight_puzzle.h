@@ -31,6 +31,8 @@ class EightPuzzle : public SearchTreeNode {
         template <typename PriorityQueue>
         bool is_not_repeated_grid(EightPuzzle, PriorityQueue);
         
+        void solution_summary(int, int, int, EightPuzzle);
+        
         void setup_grid();
         void print_grid() const;
         void setup_grid_solution();

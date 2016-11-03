@@ -38,8 +38,19 @@ void EightPuzzle::default_grid_init(std::vector<int> grid) {
     setup_grid_solution();
 }
 
-void EightPuzzle::node_expansion() {
+void EightPuzzle::node_expansion() { } 
 
+void EightPuzzle::solution_summary(int type, int maximum_queued_nodes, int expanded_size, EightPuzzle node) {
+    std::string alg_type[3] = { "uniform cost", 
+                           "A* with misplaced tile heuristic", 
+                           "A* with manhattan distance heuristic" };
+    std::cout << "Solution found.\n";
+    node.print_grid();
+    std::cout << "To solve this problem, the " << alg_type[type] << " expanded a total of "
+              << expanded_size << " nodes.\n";
+    std::cout << "The maximum number of nodes in the queue at any one time was "
+              << maximum_queued_nodes << ".\n";
+    std::cout << "The depth of the goal node was " << node.node_status.depth << ".\n";
 }
 
 std::vector<int> EightPuzzle::get_node_state() const {
@@ -110,16 +121,6 @@ bool EightPuzzle::is_not_repeated_grid(EightPuzzle child, PriorityQueue expanded
     return true;
 }
 
-// function expand(node, problem) returns a set of nodes
-// successors <- the empty set
-// for each action, result in successor-fn[problem](state[node]) do
-//      s <- a new node
-//      parent_node[s] <- node; action[s] <- action; state[s] <- result
-//      path_cost[s] <- path_cost[node] + step_cost(node, action, s)
-//      depth[s] <- depth[node] + 1
-//      add s to successor
-// return successor
-
 void EightPuzzle::uniform_cost() {
     
     auto check = [](EightPuzzle child, std::queue<EightPuzzle> expanded) {
@@ -149,13 +150,7 @@ void EightPuzzle::uniform_cost() {
         
         // if goal-test[problem] applied to state(node) succeeds return node
         if(check_grid_solution(parent_node.m_grid)) {
-            std::cout << "Solution found.\n";
-            parent_node.print_grid();
-            std::cout << "To solve this problem, the uniform cost algorithm expanded a total of "
-                      << expanded.size() << " nodes.\n";
-            std::cout << "The maximum number of nodes in the queue at any one time was "
-                      << maximum_queued_nodes << ".\n";
-            std::cout << "The depth of the goal node was " << parent_node.node_status.depth << ".\n";
+            solution_summary(0, maximum_queued_nodes, expanded.size(), parent_node);
             return;
         }
         
@@ -165,12 +160,16 @@ void EightPuzzle::uniform_cost() {
         std::cout << "Expanding this node...\n";
         
         // fringe <- insert_all(expand(node, problem), fringe)
+        // path-cost[s] <- path-cost[node] + step-cost[node, action, s]
+        // depth[s] <- depth[node] + 1
         EightPuzzle child_node(parent_node.node_status.depth + 1,
                                parent_node.node_status.path_cost + 1,
                                parent_node.node_status.heuristic_value,
                                parent_node.m_grid);
-                               
+        
+        // parent-node[s] <- node, action[s] <- action, state[s] <- result
         if(child_node.move_up() && check(child_node, expanded)) {
+            // add s to successors
             fringe.push(child_node);
             expanded.push(child_node);
         }
@@ -221,13 +220,7 @@ void EightPuzzle::misplaced_tile_astar() {
         fringe.pop();
         
         if(check_grid_solution(parent_node.m_grid)) {
-            std::cout << "Solution found.\n";
-            parent_node.print_grid();
-            std::cout << "To solve this problem, the uniform cost algorithm expanded a total of "
-                      << expanded.size() << " nodes.\n";
-            std::cout << "The maximum number of nodes in the queue at any one time was "
-                      << maximum_queued_nodes << ".\n";
-            std::cout << "The depth of the goal node was " << parent_node.node_status.depth << ".\n";
+            solution_summary(1, maximum_queued_nodes, expanded.size(), parent_node);
             return;
         }
         
@@ -286,7 +279,6 @@ void EightPuzzle::manhattan_dist_astar() {
                 int grid_column = (i % grid_width) + 1;
                 int grid_row = (i / grid_width) + 1;
                 
-                
                 std::vector<int>::iterator it = std::find(m_grid_solution.begin(), m_grid_solution.end(), grid.at(i));
                 auto index = std::distance(m_grid_solution.begin(), it);
                 
@@ -295,7 +287,6 @@ void EightPuzzle::manhattan_dist_astar() {
                 
                 count += std::abs(grid_column - solution_column)
                          + std::abs(grid_row - solution_row);
-                
             }
         }
         return count;
@@ -314,13 +305,7 @@ void EightPuzzle::manhattan_dist_astar() {
         fringe.pop();
         
         if(check_grid_solution(parent_node.m_grid)) {
-            std::cout << "Solution found.\n";
-            parent_node.print_grid();
-            std::cout << "To solve this problem, the uniform cost algorithm expanded a total of "
-                      << expanded.size() << " nodes.\n";
-            std::cout << "The maximum number of nodes in the queue at any one time was "
-                      << maximum_queued_nodes << ".\n";
-            std::cout << "The depth of the goal node was " << parent_node.node_status.depth << ".\n";
+            solution_summary(2, maximum_queued_nodes, expanded.size(), parent_node);
             return;
         }
         
