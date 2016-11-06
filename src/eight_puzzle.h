@@ -35,7 +35,7 @@ class EightPuzzle : public SearchTreeNode {
         
         void setup_grid();
         void print_grid() const;
-        void setup_grid_solution();
+        void setup_grid_solution(int);
         void print_grid_solution();
         bool check_grid_solution(std::vector<int>);
         

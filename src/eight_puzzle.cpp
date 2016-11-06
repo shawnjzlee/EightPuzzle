@@ -35,7 +35,7 @@ void EightPuzzle::default_grid_init(std::vector<int> grid) {
     node_status.heuristic_value = 0;
     m_grid = grid;
     grid_width = std::sqrt(grid.size());
-    setup_grid_solution();
+    setup_grid_solution(0);
 }
 
 void EightPuzzle::node_expansion() { } 
@@ -397,7 +397,7 @@ void EightPuzzle::setup_grid() {
         setup_grid();
     }
     
-    setup_grid_solution();
+    setup_grid_solution(0);
 }
 
 void EightPuzzle::print_grid() const {
@@ -408,15 +408,64 @@ void EightPuzzle::print_grid() const {
     std::cout << std::endl;
 }
 
-void EightPuzzle::setup_grid_solution() {
-    int j = 0;
+void EightPuzzle::setup_grid_solution(int option) {
     m_grid_solution.clear();
+    if(option == 1) {
+        std::cout << "Enter your goal state, use a zero to represent the blank."
+                  << " Separate values with a space. Press 'Enter' when complete\n";
+        std::string s, value;
+        m_grid_solution.clear();
+        
+        if(std::cin.peek() == '\n')
+            std::cin.ignore();
+        std::getline(std::cin, s);
+        std::stringstream ss(s);
+        while(getline(ss, value, ' ')) {
+            try {
+                m_grid_solution.push_back(stoi(value));
+            }
+            catch (const std::exception &e) {
+                std::cout << "Too many spaces, please re-enter the values\n";
+                setup_grid_solution(option);
+            } 
+        }
+        
+        double d_sqrt = std::sqrt(m_grid_solution.size());
+        if (d_sqrt != grid_width) {
+            std::cout << "Not a NxN grid, please enter a perfect square set of numbers\n";
+            setup_grid_solution(option);
+        }
     
-    for_each(m_grid.begin(), m_grid.end() - 1, 
-            [&, this](int &i) {
-                m_grid_solution.push_back(++j);
-            });
-    m_grid_solution.push_back(0);
+        int num_zeros = 0;
+        for_each(m_grid_solution.begin(), m_grid_solution.end(), 
+                [&, this](int &i) {
+                    if(i == 0) num_zeros++;
+                    if(num_zeros > 1) {
+                        std::cout << "Please enter only one zero\n";
+                        setup_grid_solution(option);
+                        return;
+                    }
+                    if(i > 9 && grid_width < 4) {
+                        std::cout << "Please enter single digit values\n";
+                        setup_grid_solution(option);
+                        return;
+                    }
+                });
+                
+        if(num_zeros == 0) {
+            std::cout << "Please enter one zero\n";
+            setup_grid_solution(option);
+        }
+    }
+    else {
+        int j = 0;
+        
+        for_each(m_grid.begin(), m_grid.end() - 1, 
+                [&, this](int &i) {
+                    m_grid_solution.push_back(++j);
+                });
+        m_grid_solution.push_back(0);
+    }
 }
 
 void EightPuzzle::print_grid_solution() {

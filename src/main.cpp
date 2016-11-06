@@ -2,7 +2,25 @@
 #include "global.h"
 #include "eight_puzzle.h"
 
-void algorithm_choice(EightPuzzle puzzle) { 
+void algorithm_choice(EightPuzzle &);
+
+void goal_state_choice(EightPuzzle &puzzle) {
+    int option = 0;
+    std::cout << "Override default goal state?:\n"
+              << "\t 1.\t Yes\n"
+              << "\t 2.\t No \n";
+    std::cin >> option;
+    
+    switch(option) {
+        case 1: puzzle.setup_grid_solution(option); 
+                algorithm_choice(puzzle); 
+                break;
+        case 2: algorithm_choice(puzzle); break;
+    }
+}
+
+
+void algorithm_choice(EightPuzzle &puzzle) { 
     int option = 0;
     std::cout << "Enter your choice of algorithm:\n" 
               << "\t 1.\t Uniform Cost Search\n"
@@ -31,8 +49,10 @@ void menu(void) {
     }
     
     switch(option) {
-        case 1: algorithm_choice(puzzle); break;
-        case 2: puzzle.setup_grid(); algorithm_choice(puzzle); break;
+        case 1: goal_state_choice(puzzle);  break;
+        case 2: puzzle.setup_grid(); 
+                goal_state_choice(puzzle);
+                break;
         default: std::cout << "Please re-enter an option\n"; menu();
     }
 }
