@@ -19,6 +19,7 @@ class EightPuzzle : public SearchTreeNode {
         
         void default_grid_init(std::vector<int>);
         
+        void trace_back();
         void uniform_cost();
         void misplaced_tile_astar();
         void manhattan_dist_astar();

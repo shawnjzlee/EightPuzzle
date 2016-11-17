@@ -121,6 +121,86 @@ bool EightPuzzle::is_not_repeated_grid(EightPuzzle child, PriorityQueue expanded
     return true;
 }
 
+void EightPuzzle::trace_back() {
+    auto cmp = [](EightPuzzle lhs, EightPuzzle rhs) {
+        return (lhs.node_status.path_cost + lhs.node_status.heuristic_value) >
+               (rhs.node_status.path_cost + rhs.node_status.heuristic_value);
+    };
+    
+    auto manhattan_count = [this](std::vector<int> grid) { 
+        int count = 0;
+        for(int i = 0; i < m_grid.size(); i++) {
+            if(grid.at(i) != m_grid_solution.at(i)) {
+                if(grid.at(i) == 0) grid.at(i) = 9;
+                
+                int grid_column = (i % grid_width) + 1;
+                int grid_row = (i / grid_width) + 1;
+                
+                std::vector<int>::iterator it = std::find(m_grid_solution.begin(), m_grid_solution.end(), grid.at(i));
+                auto index = std::distance(m_grid_solution.begin(), it);
+                
+                int solution_column = (index % grid_width) + 1;
+                int solution_row = (index / grid_width) + 1;
+                
+                count += std::abs(grid_column - solution_column)
+                         + std::abs(grid_row - solution_row);
+            }
+        }
+        return count;
+    };
+    
+    std::priority_queue<EightPuzzle, std::vector<EightPuzzle>, decltype(cmp)> fringe(cmp);
+    std::priority_queue<EightPuzzle, std::vector<EightPuzzle>, decltype(cmp)> expanded(cmp);
+    
+    EightPuzzle parent_node(0, 0, manhattan_count(m_grid), m_grid);
+    fringe.push(parent_node);
+    expanded.push(parent_node);
+    
+    while(!fringe.empty()) {
+        parent_node = fringe.top();
+        fringe.pop();
+        
+        if(check_grid_solution(parent_node.m_grid)) {
+            return;
+        }
+        
+        std::cout << "The best state to expand with a g(n) = "
+                  << parent_node.node_status.path_cost << " is...\n";
+        parent_node.print_grid();
+        std::cout << "Expanding this node...\n";
+        
+        EightPuzzle child_node(parent_node.node_status.depth + 1,
+                               parent_node.node_status.path_cost + 1,
+                               parent_node.node_status.heuristic_value,
+                               parent_node.m_grid);
+                               
+        if(child_node.move_up() && is_not_repeated_grid(child_node, expanded)) {
+            child_node.node_status.heuristic_value = manhattan_count(child_node.m_grid);
+            fringe.push(child_node);
+            expanded.push(child_node);
+        }
+        child_node.m_grid = parent_node.m_grid;
+        if(child_node.move_down() && is_not_repeated_grid(child_node, expanded)) {
+            child_node.node_status.heuristic_value = manhattan_count(child_node.m_grid);
+            fringe.push(child_node);
+            expanded.push(child_node);
+        }
+        child_node.m_grid = parent_node.m_grid;
+        if(child_node.move_left() && is_not_repeated_grid(child_node, expanded)) {
+            child_node.node_status.heuristic_value = manhattan_count(child_node.m_grid);
+            fringe.push(child_node);
+            expanded.push(child_node);
+        }
+        child_node.m_grid = parent_node.m_grid;
+        if(child_node.move_right() && is_not_repeated_grid(child_node, expanded)) {
+            child_node.node_status.heuristic_value = manhattan_count(child_node.m_grid);
+            fringe.push(child_node);
+            expanded.push(child_node);
+        }
+        child_node.m_grid = parent_node.m_grid;
+    }
+}
+
 void EightPuzzle::uniform_cost() {
     
     auto check = [](EightPuzzle child, std::queue<EightPuzzle> expanded) {
@@ -150,14 +230,15 @@ void EightPuzzle::uniform_cost() {
         
         // if goal-test[problem] applied to state(node) succeeds return node
         if(check_grid_solution(parent_node.m_grid)) {
+            trace_back();
             solution_summary(0, maximum_queued_nodes, expanded.size(), parent_node);
             return;
         }
         
-        std::cout << "The best state to expand with a g(n) = "
-                  << parent_node.node_status.path_cost << " is...\n";
-        parent_node.print_grid();
-        std::cout << "Expanding this node...\n";
+        // std::cout << "The best state to expand with a g(n) = "
+        //           << parent_node.node_status.path_cost << " is...\n";
+        // parent_node.print_grid();
+        // std::cout << "Expanding this node...\n";
         
         // fringe <- insert_all(expand(node, problem), fringe)
         // path-cost[s] <- path-cost[node] + step-cost[node, action, s]
